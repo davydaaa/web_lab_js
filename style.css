@@ -6,14 +6,19 @@ input {
     width: 250px;
 }
 .create {
+    padding-top: 20px;
     margin-left: 2%; 
+}
+
+#toggle_create_form_button{
+    padding: 10px;
 }
 
 .create h3 {
     font-size: 20px;
     font-weight: 700;
     margin: 0;
-    margin-bottom: 30px;
+    margin-bottom: 10px;
 }
 
 
@@ -40,12 +45,20 @@ body {
 .card_body {
     height: fit-content;
     width: 150px;
-    margin: 0 10px;
+    margin: 10px 10px;
     background-color:white;
     border-radius: 10px;
     box-shadow: 0px 0px 20px grey;
     padding: 15px;
 }
+
+.card_body input {
+    background: transparent;
+    border: none;
+    width: 140px;
+}
+
+
 
 .specs {
     display: flex;
@@ -74,4 +87,8 @@ body {
 .sort button {
     width: 100px;
     margin-top: 10px;
+}
+
+.cancel_button {
+    margin-top: 5px;
 }
