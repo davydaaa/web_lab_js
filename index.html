@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Page</title>
+    <link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+    <div class="options">
+        <h1>SchoolPen</h1>
+
+        <button id="toggle_create_form_button">Create item</button>
+
+        <form class="create" id="create_form" style="display: none;">
+            <h3>Create</h3>
+            
+    
+            <div class="specs">
+                <label>brand</label>
+                <input type="text" id="brand_input" placeholder="Type brand">
+            </div>
+            <div class="specs">
+                <label>color</label>
+                <input type="text" id="color_input" placeholder="Type color">
+            </div>
+            <div class="specs">
+                <label>matherial</label>
+                <input type="text" id="matherial_input" placeholder="Type matherial">
+            </div>
+             <div class="specs">
+                <label>number of pencils</label>
+                <input type="number" id="num_pencils_input" placeholder="Type number of pencils">
+            </div>
+            <div class="specs">
+                <label>number of pens</label>
+                <input type="number" id="num_pens_input" placeholder="Type number of pens">
+            </div>
+            <div class="specs">
+                <label>number of erasers</label>
+                <input type="number" id="num_erasers_input" placeholder="Type number of erasers">
+            </div>
+    
+            <button id="create_button">Create</button>
+        </form>
+    
+        <div class="search">
+            <h3>Search</h3>
+            
+            <div class="specs">
+                <input type="text" id="search_input" placeholder="Type brand name">
+            </div>
+    
+            <button id="search_button">Search</button>
+            <button id="cancel_search_button">Cancel</button>
+        </div>
+    
+        <div class="sort">
+            <button id="sort_button">Sort</button>
+            <button id="count_button">Count total amount</button>
+        </div>
+
+
+    </div>
+    
+    <div id="card">
+
+    </div>
+    
+    <script type="module" src="/js/index.js"></script>
+</body>
+</html>
