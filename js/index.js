@@ -57,13 +57,15 @@ const itemTemplate = (item) => `
     <span>Brand:</span><input class="brand_input" value="${item.brand}" disabled>
     <span>Color:</span><input class="color_input" value="${item.color}" disabled>
     <span>Matherial:</span><input class="matherial_input" value="${item.matherial}" disabled>
-    <span>Pencils:</span><input class="num_pencils_input" value="${item.num_pencils}" disabled>
-    <span>Pens:</span><input class="num_pens_input" value="${item.num_pens}" disabled>
-    <span>Erasers:</span><input class="num_erasers_input" value="${item.num_erasers}" disabled>
+    <span>Pencils:</span><input class="num_pencils_input" value="${item.number_of_pencils}" disabled>
+    <span>Pens:</span><input class="num_pens_input" value="${item.number_of_pens}" disabled>
+    <span>Erasers:</span><input class="num_erasers_input" value="${item.number_of_erasers}" disabled>
     <button class="edit_button">Edit</button>
+    <button class="delete_button">Delete</button>
     <button class="cancel_button" style="display: none;">Cancel</button>
   </div>
 `;
+
 
 const addItemToPage = (item) => {
   const itemElement = document.createElement('div');
@@ -97,7 +99,27 @@ const addItemToPage = (item) => {
         item.num_erasers = newNumErasers;
       }
     });
+    
+    // Передаємо ідентифікатор елемента при оновленні на сервері
+    updateItemOnServer(item);
   });
+  
+
+  const deleteButton = itemElement.querySelector('.delete_button');
+
+  deleteButton.addEventListener('click', async () => {
+      const confirmed = confirm('Are you sure you want to delete this item?');
+      if (confirmed) {
+          try {
+              await deleteItemOnServer(item.id);
+              // Видаліть елемент зі сторінки після успішного видалення на сервері
+              itemElement.remove();
+          } catch (error) {
+              console.error('Error deleting item:', error.message);
+          }
+      }
+  });
+  
   
 
   cancelButton.addEventListener('click', () => {
@@ -116,6 +138,49 @@ const addItemToPage = (item) => {
 
   Card.insertAdjacentElement("afterbegin", itemElement);
 };
+
+
+const updateItemOnServer = async (item) => {
+  try {
+    const response = await fetch(`/api/stationery/${item.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(item),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to update item on the server');
+    }
+
+    // Оновити дані в масиві schoolpens після успішного відправлення на сервер
+    const updatedItem = await response.json();
+    const index = schoolpens.findIndex((p) => p.id === updatedItem.id);
+
+    if (index !== -1) {
+      schoolpens[index] = updatedItem;
+    }
+  } catch (error) {
+    console.error('Error updating item:', error.message);
+  }
+};
+
+const deleteItemOnServer = async (itemId) => {
+  try {
+      const response = await fetch(`/api/stationery/${itemId}`, {
+          method: 'DELETE',
+      });
+
+      if (!response.ok) {
+          throw new Error('Failed to delete item on the server');
+      }
+  } catch (error) {
+      console.error('Error deleting item:', error.message);
+  }
+};
+
+
 
 
 
@@ -138,20 +203,38 @@ const addItem = ({brand, color, matherial, num_pencils, num_pens, num_erasers}) 
 };
 
 
-CreateButton.addEventListener("click", (event) => {
-    event.preventDefault();
-  
-    const { brand, color, matherial, num_pencils, num_pens, num_erasers } = getInputValues();
-  
-    if (isNaN(num_pencils) || isNaN(num_pens) || isNaN(num_erasers) || num_pencils < 0 || num_pens < 0 || num_erasers < 0) {
-      alert("Введіть невід'ємні числа для кількості олівців, ручок та резинок.");
-      return;
+CreateButton.addEventListener("click", async (event) => {
+  event.preventDefault();
+
+  const { brand, color, matherial, num_pencils, num_pens, num_erasers } = getInputValues();
+
+  if (isNaN(num_pencils) || isNaN(num_pens) || isNaN(num_erasers) || num_pencils < 0 || num_pens < 0 || num_erasers < 0) {
+    alert("Введіть невід'ємні числа для кількості олівців, ручок та резинок.");
+    return;
+  }
+
+  clearInputs();
+
+  try {
+    const response = await fetch('/api/stationery', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ brand, color, matherial, num_pencils, num_pens, num_erasers }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to create item on the server');
     }
-  
-    clearInputs();
-  
-    addItem({ brand, color, matherial, num_pencils, num_pens, num_erasers });
-  });
+
+    const newItem = await response.json();
+    addItem(newItem); // Оновіть вашу функцію, яка додає елемент на сторінку
+  } catch (error) {
+    console.error('Error creating item:', error.message);
+  }
+});
+
   
 
 let searchResults = [];
@@ -180,20 +263,23 @@ SortButton.addEventListener("click", () => {
   });
   
 
-CountButton.addEventListener("click", () => {
-  const itemsToCount = searchResults.length > 0 ? searchResults : schoolpens;
-  let totalPencils = 0;
-  let totalPens = 0;
-  let totalErasers = 0;
+  CountButton.addEventListener("click", () => {
+    const itemsToCount = searchResults.length > 0 ? searchResults : schoolpens;
+    let totalPencils = 0;
+    let totalPens = 0;
+    let totalErasers = 0;
+  
+    for (const item of itemsToCount) {
+      totalPencils += Number(item.num_pencils || 0);
+      totalPens += Number(item.num_pens || 0);
+      totalErasers += Number(item.num_erasers || 0);
+    }
+  
+    alert(`Загальна кількість олівців: ${totalPencils}, ручок: ${totalPens}, резинок: ${totalErasers}`);
+  });
+  
+  
 
-  for (const item of itemsToCount) {
-      totalPencils += Number(item.num_pencils);
-      totalPens += Number(item.num_pens);
-      totalErasers += Number(item.num_erasers);
-  }
-
-  alert(`Загальна кількість олівців: ${totalPencils}, ручок: ${totalPens}, резинок: ${totalErasers}`);
-});
 
 toggleCreateFormButton.addEventListener("click", () => {
   if (createForm.style.display === "none") {
@@ -202,3 +288,27 @@ toggleCreateFormButton.addEventListener("click", () => {
       createForm.style.display = "none";
   }
 });
+
+const fetchDataFromBackend = async () => {
+  try {
+      const response = await fetch('/api/stationery');
+      if (!response.ok) {
+          throw new Error('Failed to fetch data from the backend');
+      }
+
+      const data = await response.json();
+      return data;
+  } catch (error) {
+      console.error('Error fetching data from the backend:', error.message);
+      return [];
+  }
+};
+
+const init = async () => {
+  // Fetch data from the backend when the page loads
+  schoolpens = await fetchDataFromBackend();
+  renderItemsList(schoolpens);
+};
+
+// Call the init function to fetch data when the page loads
+init();
